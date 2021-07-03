@@ -7,17 +7,17 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from network_model import Network
-from utils.signals import getSignal, generateSignalData
+from utils.signals import generateSignalData
 import time
 
 if __name__ == "__main__":
     # %% Signal parameters
 
     # ["sin", "square", "saw"]
-    classes = ["sin", "square", "saw"]
+    classes = ["sin"]
 
     # [np.sin, signal.square, signal.sawtooth]
-    waves = [np.sin, signal.square, signal.sawtooth]
+    waves = [np.sin]
 
     Fs = 2000
     signal_len = 200
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     noise_std_percent = 0.1
     # %% Training parameters
     num_signals = 10000
-    num_epochs = 30
+    num_epochs = 10
     batch_size = 64
     lr = 0.003
     holdout_ratio = 0.7
