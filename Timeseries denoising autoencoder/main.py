@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from network_model import Network
-from utils.signals import getSignal
+from utils.signals import getSignal, generateSignalData
 import time
 
 if __name__ == "__main__":
@@ -39,29 +39,16 @@ if __name__ == "__main__":
     test_num = num_signals - train_num
 
     # %% Generate data
-
-    signal_data = np.zeros((num_signals, signal_len))
-    signal_labels = np.zeros((num_signals, signal_len))
-
-    # make a signal from a random class with random parameters
-    for i in range(num_signals):
-        chooser = np.random.randint(len(classes))
-
-        # uniformally pick parameters
-        amp = np.random.rand() * (amp_max - amp_min) + amp_min
-        freq = np.random.rand() * (freq_max - freq_min) + freq_min
-        phase = np.random.rand() * 2 * np.pi
-
-        # awgn for good measure
-        noise_std = noise_std_percent * amp
-
-        signal_labels[i, :] = getSignal(wave=waves[chooser],
-                                        amp=amp,
-                                        freq=freq,
-                                        phase=phase,
-                                        t=t).reshape(1, signal_len)
-
-        signal_data[i, :] = signal_labels[i, :] + noise_std * np.random.randn(1, signal_len)
+    signal_labels, cathegorical_labels, signal_data = generateSignalData(num_signals=num_signals,
+                                                                         signal_len=signal_len,
+                                                                         classes=classes,
+                                                                         waves=waves,
+                                                                         amp_max=amp_max,
+                                                                         amp_min=amp_min,
+                                                                         freq_max=freq_max,
+                                                                         freq_min=freq_min,
+                                                                         t=t,
+                                                                         noise_std_percent=noise_std_percent)
 
     data_std = np.std(signal_data)
     # %% Visualizing the data
