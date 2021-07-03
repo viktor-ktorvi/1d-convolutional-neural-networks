@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -9,16 +8,27 @@ class Network(nn.Module):
     def __init__(self, signal_len):
         super(Network, self).__init__()
 
-        kernel_pool = 2
-        kernel_conv1 = 5
-        kernel_conv2 = 5
-        out_conv1 = calcConv1dPoolOutSize(signal_len, kernel_conv1, kernel_pool)
-        out_conv2 = calcConv1dPoolOutSize(out_conv1, kernel_conv2, kernel_pool)
+        conv1_sizes = Conv1dLayerSizes(in_ch=1, out_ch=20, kernel=5)
+        pool1_kernel = 2
 
-        # TODO configure padding so that the edges look better
-        self.pool = nn.MaxPool1d(kernel_pool)
-        self.conv1 = nn.Conv1d(in_channels=1, out_channels=20, kernel_size=kernel_conv1)
-        self.conv2 = nn.Conv1d(in_channels=20, out_channels=50, kernel_size=kernel_conv2)
+        self.conv1 = nn.Sequential(
+            nn.Conv1d(in_channels=conv1_sizes.in_ch,
+                      out_channels=conv1_sizes.out_ch,
+                      kernel_size=conv1_sizes.kernel_size),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=pool1_kernel)
+        )
+
+        conv2_sizes = Conv1dLayerSizes(in_ch=conv1_sizes.out_ch, out_ch=50, kernel=5)
+        pool2_kernel = 2
+
+        self.conv2 = nn.Sequential(
+            nn.Conv1d(in_channels=conv2_sizes.in_ch,
+                      out_channels=conv2_sizes.out_ch,
+                      kernel_size=conv2_sizes.kernel_size),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=pool2_kernel)
+        )
 
         stride = 2
         out_deconv1 = round(signal_len / 2)
