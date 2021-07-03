@@ -39,16 +39,16 @@ if __name__ == "__main__":
     test_num = num_signals - train_num
 
     # %% Generate data
-    signal_labels, cathegorical_labels, signal_data = generateSignalData(num_signals=num_signals,
-                                                                         signal_len=signal_len,
-                                                                         classes=classes,
-                                                                         waves=waves,
-                                                                         amp_max=amp_max,
-                                                                         amp_min=amp_min,
-                                                                         freq_max=freq_max,
-                                                                         freq_min=freq_min,
-                                                                         t=t,
-                                                                         noise_std_percent=noise_std_percent)
+    signal_labels, _, signal_data = generateSignalData(num_signals=num_signals,
+                                                       signal_len=signal_len,
+                                                       classes=classes,
+                                                       waves=waves,
+                                                       amp_max=amp_max,
+                                                       amp_min=amp_min,
+                                                       freq_max=freq_max,
+                                                       freq_min=freq_min,
+                                                       t=t,
+                                                       noise_std_percent=noise_std_percent)
 
     data_std = np.std(signal_data)
     # %% Visualizing the data
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_set, batch_size=test_num)
     # %% Training
-    torch.manual_seed(26)
+    # torch.manual_seed(26)
     model = Network(signal_len)
     model = model.to(device)
     criterion = nn.MSELoss()
@@ -115,6 +115,9 @@ if __name__ == "__main__":
     # %% Testing
 
     # pass the whole test set thorugh the model and check outputs
+    test_signals = 0
+    test_labels = 0
+    outputs = 0
     with torch.no_grad():
         for data in test_dataloader:
             test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
