@@ -47,3 +47,9 @@ class TransposeConv1dLayerSizes:
         # TODO throw exception
 
         return kernel_size
+
+
+class FullyConnectedLayerSizes:
+    def __init__(self, in_features, out_features):
+        self.in_features = in_features
+        self.out_features = out_features
