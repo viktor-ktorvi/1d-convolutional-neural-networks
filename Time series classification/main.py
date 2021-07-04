@@ -32,7 +32,7 @@ if __name__ == "__main__":
     noise_std_percent = 0.1
     # %% Training parameters
     num_signals = 10000
-    num_epochs = 3
+    num_epochs = 10
     batch_size = 64
     lr = 0.003
     holdout_ratio = 0.7
@@ -58,8 +58,9 @@ if __name__ == "__main__":
     plt.title("No noise VS noise")
     for i in range(1):
         idx = np.random.randint(num_signals)
-        plt.plot(ground_truth[idx, :], label="signal")
         plt.plot(signal_data[idx, :], label="signal + noise")
+        plt.plot(ground_truth[idx, :], label="signal")
+
     plt.xlabel("n [sample]")
     plt.ylabel("signal [num]")
     plt.legend()
@@ -143,28 +144,5 @@ if __name__ == "__main__":
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     disp.plot(cmap='Greens')
 
-    # %% Visually checking results
-    check_num = 1
-    check_set, _ = torch.utils.data.random_split(test_set, [check_num, test_num - check_num])
+    # TODO see the examples that the network got wrong
 
-    check_dataloader = DataLoader(check_set, batch_size=check_num)
-
-    with torch.no_grad():
-        plt.figure()
-        for data in check_dataloader:
-            test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
-            outputs = model(test_signals.unsqueeze(1))
-
-            _, predicted = torch.max(outputs, 1)
-            predicted = predicted.detach().cpu().numpy()
-            test_labels = test_labels.detach().cpu().numpy().reshape(check_num)
-
-        for i, test_signal in enumerate(test_signals):
-            plt.plot(test_signal,
-                     label="predicted = " + classes[predicted[i]] + "\nground truth = " + classes[int(test_labels[i])])
-
-        plt.title("Samles and predictions")
-        plt.xlabel("n [sample]")
-        plt.ylabel("signal [num]")
-        plt.legend()
-        plt.show()
