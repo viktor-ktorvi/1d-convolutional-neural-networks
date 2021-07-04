@@ -1,4 +1,4 @@
-# Timeseries denoising autoencoder
+# Time series denoising autoencoder
 
 A simple [denoising autoencoder](https://en.wikipedia.org/wiki/Autoencoder) with 1d CNNs for denoising sine, square and sawtooth waves of random amplitude, frequency and phase.
 
