@@ -1,4 +1,4 @@
-# 1D CNNs a.k.a. Temporal Convolutional Networks in Pytorch
+# 1D CNNs or Temporal Convolutional Networks in Pytorch
 Simple 1d CNN examples for working with time series data :)
 
 ## Examples
