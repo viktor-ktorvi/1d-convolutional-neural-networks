@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
             optimizer.zero_grad()
 
-            outputs = model(test_signals.unsqueeze(1) / data_std) * data_std
+            outputs = model(test_signals.unsqueeze(1) / data_std)
             loss = criterion(outputs, test_labels)
             loss.backward()
             optimizer.step()
