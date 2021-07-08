@@ -114,16 +114,3 @@ if __name__ == "__main__":
 
             mse = criterion(outputs, test_labels.view(outputs.shape))
             print("test MSE = %.3f" % mse)
-    # %% Visually checking results
-
-    plt.figure()
-    plt.title("Noisy VS denoised")
-    for i in range(1):
-        idx = np.random.randint(test_num)
-        plt.plot(test_signals[idx, :], label="noisy")
-        plt.plot(outputs[idx, :].T, label="denoised")
-        plt.plot(test_labels[idx, :], label="ground truth")
-    plt.xlabel("n [sample]")
-    plt.ylabel("signal [num]")
-    plt.legend()
-    plt.show()
