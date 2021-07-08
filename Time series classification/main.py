@@ -32,9 +32,9 @@ if __name__ == "__main__":
     noise_std_percent = 0.1
     # %% Training parameters
     num_signals = 10000
-    num_epochs = 10
+    num_epochs = 30
     batch_size = 64
-    lr = 0.003
+    lr = 0.001
     holdout_ratio = 0.7
 
     train_num = round(holdout_ratio * num_signals)
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         for data in test_dataloader:
             test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
-            outputs = model(test_signals.unsqueeze(1))
+            outputs = model(test_signals.unsqueeze(1) / data_std)
 
             _, predicted = torch.max(outputs, 1)
 
@@ -131,5 +131,65 @@ if __name__ == "__main__":
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     disp.plot(cmap='Greens')
 
-    # TODO see the examples that the network got wrong
+    # %% Visualization
 
+    '''
+        Just generating a test time series for each class and 
+        passing it through the network to see the results
+    '''
+
+    with torch.no_grad():
+        height = 3
+        width = 3
+        fig, ax = plt.subplots(height, width)
+
+        # make a nice 3x3
+        for i in range(height):
+            for j in range(width):
+
+                # generate the signal
+                _, _, signal_data = generateSignalData(num_signals=1,
+                                                       signal_len=signal_len,
+                                                       classes=[classes[i]],
+                                                       waves=[waves[i]],
+                                                       amp_max=amp_max,
+                                                       amp_min=amp_min,
+                                                       freq_max=freq_max,
+                                                       freq_min=freq_min,
+                                                       t=t,
+                                                       noise_std_percent=noise_std_percent)
+
+                # boring task of making the data presentable to the network
+                signal_labels = i * np.ones((1, 1))
+                dataset = TensorDataset(torch.tensor(signal_data), torch.tensor(signal_labels).type(torch.LongTensor))
+                dataloader = DataLoader(dataset, batch_size=1)
+
+                # for loops only once as thats the batch size
+                for data in dataloader:
+                    test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device,
+                                                                                                  dtype=torch.float)
+                    # see what the model has to say
+                    outputs = model(test_signals.unsqueeze(1) / data_std)
+                    _, predicted = torch.max(outputs, 1)
+
+                # torch to numpy bureaucracy
+                test_signals = test_signals.detach().cpu().numpy().squeeze()
+                predicted = predicted.detach().cpu().numpy()
+                test_labels = test_labels.detach().cpu().numpy().reshape(1)
+
+                # color it green if it's good, red if it's not
+                results = predicted == test_labels
+                if results:
+                    color = 'g'
+                else:
+                    color = 'r'
+
+                ax[i, j].plot(test_signals, color=color, label="prediction:\n" + classes[int(predicted)])
+                ax[i, j].set_title(classes[i], fontsize=16)
+                ax[i, j].set_xlabel('n [sample]', fontsize=12)
+                ax[i, j].set_ylabel('x(n) [unit]', fontsize=12)
+                ax[i, j].legend(loc='upper right')
+
+        fig.suptitle("Predictions", horizontalalignment='center', fontsize=20)
+        plt.tight_layout()
+        plt.show()
