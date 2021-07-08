@@ -14,17 +14,17 @@ if __name__ == "__main__":
     # %% Signal parameters
 
     # ["sin", "square", "saw"]
-    classes = ["sin"]
+    classes = ["sin", "square", "saw"]
 
     # [np.sin, signal.square, signal.sawtooth]
-    waves = [np.sin]
+    waves = [np.sin, signal.square, signal.sawtooth]
 
     Fs = 2000
     signal_len = 200
     t = np.linspace(0, (signal_len - 1) / Fs, signal_len)
     amp_max = 10
     amp_min = 0
-    freq_max = 100
+    freq_max = 50
     freq_min = 10
 
     noise_std_percent = 0.1
@@ -114,3 +114,44 @@ if __name__ == "__main__":
 
             mse = criterion(outputs, test_labels.view(outputs.shape))
             print("test MSE = %.3f" % mse)
+
+    # %% Visualization
+
+    '''
+        Just generating a test time series for each class and 
+        passing it through the network to see the results
+    '''
+
+    with torch.no_grad():
+        fig, ax = plt.subplots(3, 1)
+
+        for i in range(3):
+            signal_labels, _, signal_data = generateSignalData(num_signals=1,
+                                                               signal_len=signal_len,
+                                                               classes=[classes[i]],
+                                                               waves=[waves[i]],
+                                                               amp_max=amp_max,
+                                                               amp_min=amp_min,
+                                                               freq_max=freq_max,
+                                                               freq_min=freq_min,
+                                                               t=t,
+                                                               noise_std_percent=noise_std_percent)
+
+            dataset = TensorDataset(torch.tensor(signal_data), torch.tensor(signal_labels))
+            dataloader = DataLoader(dataset, batch_size=1)
+
+            for data in dataloader:
+                test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
+                outputs = model(test_signals.unsqueeze(1) / data_std) * data_std
+
+            noisy = test_signals.detach().cpu().numpy().squeeze()
+            denoised = outputs.detach().cpu().numpy().squeeze()
+            ax[i].plot(noisy, label='noisy signal')
+            ax[i].plot(denoised, color='r', label='denoised signal')
+            ax[i].set_title(classes[i])
+            ax[i].set_xlabel('n [sample]')
+            ax[i].set_ylabel('x(n) [unit]')
+            ax[i].legend()
+        fig.suptitle("Filtered signals", horizontalalignment='center')
+        plt.tight_layout()
+        plt.show()

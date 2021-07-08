@@ -15,12 +15,12 @@ if __name__ == "__main__":
     t = np.linspace(0, (signal_len - 1) / Fs, signal_len)
     amp_max = 10
     amp_min = 0
-    freq_max = 100
+    freq_max = 50
     freq_min = 10
 
     noise_std_percent = 0.1
 
-    filter_len = 5  # odd number
+    filter_len = 3  # odd number
 
     fig, ax = plt.subplots(3, 1)
     for i in range(3):
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         b = np.ones(filter_len)
         a = filter_len
         xfiltered = signal.filtfilt(b, a, xnoise)
-        ax[i].plot(xnoise, label='signal + noise')
+        ax[i].plot(xnoise, label='noisy signal')
         ax[i].plot(xfiltered, color='r', label='filtered signal')
         ax[i].set_title(classes[i])
         ax[i].set_xlabel('n [sample]')
