@@ -32,7 +32,7 @@ if __name__ == "__main__":
     noise_std_percent = 0.1
     # %% Training parameters
     num_signals = 10000
-    num_epochs = 30
+    num_epochs = 10
     batch_size = 64
     lr = 0.001
     holdout_ratio = 0.7
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_set, batch_size=test_num)
     # %% Training
-    torch.manual_seed(26)
+    # torch.manual_seed(26)
 
     model = Network(signal_len, classes)
     model = model.to(device)
