@@ -30,7 +30,7 @@ if __name__ == "__main__":
     noise_std_percent = 0.1
     # %% Training parameters
     num_signals = 10000
-    num_epochs = 10
+    num_epochs = 100
     batch_size = 64
     lr = 0.003
     holdout_ratio = 0.7
@@ -148,10 +148,10 @@ if __name__ == "__main__":
             denoised = outputs.detach().cpu().numpy().squeeze()
             ax[i].plot(noisy, label='noisy signal')
             ax[i].plot(denoised, color='r', label='denoised signal')
-            ax[i].set_title(classes[i])
-            ax[i].set_xlabel('n [sample]')
-            ax[i].set_ylabel('x(n) [unit]')
+            ax[i].set_title(classes[i], fontsize=16)
+            ax[i].set_xlabel('n [sample]', fontsize=12)
+            ax[i].set_ylabel('x(n) [unit]', fontsize=12)
             ax[i].legend()
-        fig.suptitle("Filtered signals", horizontalalignment='center')
+        fig.suptitle("Denoised signals", horizontalalignment='center', fontsize=20)
         plt.tight_layout()
         plt.show()
