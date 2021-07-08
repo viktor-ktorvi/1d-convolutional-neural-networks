@@ -53,19 +53,6 @@ if __name__ == "__main__":
                                                                   noise_std_percent=noise_std_percent)
 
     data_std = np.std(signal_data)
-    # %% Visualizing the data
-    plt.figure()
-    plt.title("No noise VS noise")
-    for i in range(1):
-        idx = np.random.randint(num_signals)
-        plt.plot(signal_data[idx, :], label="signal + noise")
-        plt.plot(ground_truth[idx, :], label="signal")
-
-    plt.xlabel("n [sample]")
-    plt.ylabel("signal [num]")
-    plt.legend()
-    plt.show()
-
     # %% Setting up the data
     device = torch.device("cpu")  # CPU because I have a weak GPU
     print(device)
