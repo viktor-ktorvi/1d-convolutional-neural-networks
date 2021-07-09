@@ -11,6 +11,9 @@ Simple 1d CNN examples for working with time series data :)
 
 ## Examples
 
-[Time series classification](https://github.com/viktor-ktorvi/1d-convolutional-neural-networks/tree/master/Time%20series%20classification)
+### 1d CNNs
+An important thing to note here is that the networks don't use dilated convolution so it's not really a TCN, it's basically a classical 2d CNN with maxpools adapted to a 1d signal.
 
-[Time series denoising autoencoder](https://github.com/viktor-ktorvi/1d-convolutional-neural-networks/tree/master/Time%20series%20denoising%20autoencoder)
+* [Time series classification](https://github.com/viktor-ktorvi/1d-convolutional-neural-networks/tree/master/Time%20series%20classification)
+
+* [Time series denoising autoencoder](https://github.com/viktor-ktorvi/1d-convolutional-neural-networks/tree/master/Time%20series%20denoising%20autoencoder)
