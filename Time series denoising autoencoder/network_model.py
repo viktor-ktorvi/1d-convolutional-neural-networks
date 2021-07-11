@@ -1,4 +1,5 @@
 import torch.nn as nn
+
 from utils.sizes import Conv1dLayerSizes, TransposeConv1dLayerSizes
 
 
@@ -72,3 +73,4 @@ class Network(nn.Module):
         x = self.deconv2(x)
 
         return x
+
