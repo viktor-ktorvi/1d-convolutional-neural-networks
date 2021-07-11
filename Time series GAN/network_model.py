@@ -1,6 +1,6 @@
 import torch.nn as nn
 from utils.sizes import Conv1dLayerSizes, TransposeConv1dLayerSizes, FullyConnectedLayerSizes
-
+from torch import functional as F
 
 class Generator(nn.Module):
     def __init__(self, signal_len, noise_len):
@@ -91,9 +91,10 @@ class Discriminator(nn.Module):
         )
 
         fc3_sizes = FullyConnectedLayerSizes(in_features=fc2_sizes.out_features,
-                                             out_features=2)
+                                             out_features=1)
 
         self.fc3 = nn.Linear(in_features=fc3_sizes.in_features, out_features=fc3_sizes.out_features)
+        self.activation = nn.Sigmoid()
 
     def forward(self, x):
         x = self.conv1(x)
@@ -102,5 +103,6 @@ class Discriminator(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.fc3(x)
+        x = self.activation(x)
 
         return x
