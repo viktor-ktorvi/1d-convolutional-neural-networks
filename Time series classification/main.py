@@ -83,16 +83,16 @@ if __name__ == "__main__":
         running_loss = 0
 
         for i, data in enumerate(train_dataloader, 0):
-            test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
+            train_signals, train_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
 
             # reformating the label array to the form that the loss expects
-            test_labels = test_labels.view(test_labels.shape[0])
-            test_labels = test_labels.type(torch.LongTensor)
+            train_labels = train_labels.view(train_labels.shape[0])
+            train_labels = train_labels.type(torch.LongTensor)
 
             optimizer.zero_grad()
 
-            outputs = model(test_signals.unsqueeze(1) / data_std)
-            loss = criterion(outputs, test_labels)
+            outputs = model(train_signals.unsqueeze(1) / data_std)
+            loss = criterion(outputs, train_labels)
             loss.backward()
             optimizer.step()
 
