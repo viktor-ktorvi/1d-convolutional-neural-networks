@@ -30,7 +30,7 @@ if __name__ == "__main__":
     noise_std_percent = 0.1
     # %% Training parameters
     num_signals = 10000
-    num_epochs = 100
+    num_epochs = 10
     batch_size = 64
     lr = 0.003
     holdout_ratio = 0.7
@@ -78,12 +78,12 @@ if __name__ == "__main__":
         running_loss = 0
 
         for i, data in enumerate(train_dataloader, 0):
-            test_signals, test_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
+            train_signals, train_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
 
             optimizer.zero_grad()
 
-            outputs = model(test_signals.unsqueeze(1) / data_std) * data_std
-            loss = criterion(outputs, test_labels.view(outputs.shape))
+            outputs = model(train_signals.unsqueeze(1) / data_std) * data_std
+            loss = criterion(outputs, train_labels.view(outputs.shape))
             loss.backward()
             optimizer.step()
 
