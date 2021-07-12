@@ -27,9 +27,11 @@ if __name__ == "__main__":
     # %% Training parameters
     noise_len = 10
     num_signals = 1000
-    num_epochs = 30
+    num_epochs = 100
     batch_size = 64
-    lr = 0.001
+    lrg = 0.006
+    lrd = lrg/50
+    discriminate_every_n_batches = 10
 
     # %% Generate data
     ground_truth, signal_labels, signal_data = generateSignalData(num_signals=num_signals,
@@ -46,7 +48,8 @@ if __name__ == "__main__":
     data_std = np.std(signal_data)
 
     # %% Setting up the data
-    device = torch.device("cpu")  # CPU because I have a weak GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")  # CPU because I have a weak GPU
     print(device)
 
     dataset = TensorDataset(torch.tensor(ground_truth), torch.ones(num_signals))
@@ -61,8 +64,8 @@ if __name__ == "__main__":
     discriminator = Discriminator(signal_len=signal_len)
     discriminator = discriminator.to(device)
 
-    generator_optimizer = torch.optim.Adam(generator.parameters(), lr=lr)
-    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=lr)
+    generator_optimizer = torch.optim.Adam(generator.parameters(), lr=lrg)
+    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=lrd)
 
     criterion = nn.BCELoss()
 
@@ -78,7 +81,7 @@ if __name__ == "__main__":
             # generator
             generator_optimizer.zero_grad()
 
-            noise = torch.randn((batch_size, noise_len))
+            noise = torch.randn((batch_size, noise_len)).to(device)
             generated_data = generator(noise.unsqueeze(1))
             generator_discriminator_out = discriminator(generated_data)
 
@@ -90,21 +93,22 @@ if __name__ == "__main__":
 
             # discriminator
 
-            discriminator_optimizer.zero_grad()
+            if i % discriminate_every_n_batches == 0:
+                discriminator_optimizer.zero_grad()
 
-            true_discriminator_out = discriminator(train_signals.unsqueeze(1))
-            true_discriminator_loss = criterion(true_discriminator_out, torch.ones_like(true_discriminator_out))
+                true_discriminator_out = discriminator(train_signals.unsqueeze(1))
+                true_discriminator_loss = criterion(true_discriminator_out, torch.ones_like(true_discriminator_out))
 
-            generator_discriminator_out = discriminator(generated_data.detach())
-            generator_discriminator_loss = criterion(generator_discriminator_out,
-                                                     torch.zeros_like(generator_discriminator_out))
+                generator_discriminator_out = discriminator(generated_data.detach())
+                generator_discriminator_loss = criterion(generator_discriminator_out,
+                                                         torch.zeros_like(generator_discriminator_out))
 
-            discriminator_loss = (true_discriminator_loss + generator_discriminator_loss) / 2
+                discriminator_loss = (true_discriminator_loss + generator_discriminator_loss) / 2
 
-            discriminator_loss.backward()
-            discriminator_optimizer.step()
+                discriminator_loss.backward()
+                discriminator_optimizer.step()
 
-            running_discriminator_loss += discriminator_loss.item()
+                running_discriminator_loss += discriminator_loss.item()
 
         print("epoch: %d\n\tG loss: %0.10f \t D loss: %0.10f" % (
             epoch, running_generator_loss, running_discriminator_loss))
@@ -124,7 +128,7 @@ if __name__ == "__main__":
     # %%
 
     with torch.no_grad():
-        noise = torch.randn((1, noise_len))
+        noise = torch.randn((1, noise_len)).to(device)
         generated_data = generator(noise.unsqueeze(1))
 
         generated_data = generated_data.detach().cpu().numpy().squeeze()
