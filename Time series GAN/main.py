@@ -27,10 +27,10 @@ if __name__ == "__main__":
     # %% Training parameters
     noise_len = 10
     num_signals = 1000
-    num_epochs = 100
+    num_epochs = 5000
     batch_size = 64
-    lrg = 0.006
-    lrd = lrg/50
+    lrg = 0.005
+    lrd = lrg/10
     discriminate_every_n_batches = 10
 
     # %% Generate data
@@ -45,7 +45,7 @@ if __name__ == "__main__":
                                                                   t=t,
                                                                   noise_std_percent=noise_std_percent)
 
-    data_std = np.std(signal_data)
+    data_std = np.std(ground_truth)
 
     # %% Setting up the data
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
