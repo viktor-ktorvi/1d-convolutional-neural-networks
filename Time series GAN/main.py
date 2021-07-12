@@ -5,6 +5,9 @@ from torch.utils.data import DataLoader, TensorDataset
 from torch import nn
 from network_model import Generator, Discriminator
 from utils.signals import generateSignalData
+import time
+
+import scipy.signal as signal
 
 if __name__ == "__main__":
     # %% Signal parameters
@@ -27,7 +30,7 @@ if __name__ == "__main__":
     # %% Training parameters
     noise_len = 10
     num_signals = 1000
-    num_epochs = 5000
+    num_epochs = 200
     batch_size = 64
     lrg = 0.005
     lrd = lrg/10
@@ -68,6 +71,9 @@ if __name__ == "__main__":
     discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=lrd)
 
     criterion = nn.BCELoss()
+
+    start = time.time()
+    print("Training started")
 
     generator_loss_array = []
     discriminator_loss_array = []
@@ -114,6 +120,9 @@ if __name__ == "__main__":
             epoch, running_generator_loss, running_discriminator_loss))
         generator_loss_array.append(running_generator_loss)
         discriminator_loss_array.append(running_discriminator_loss)
+
+    end = time.time()
+    print("Training complete. It took %5.2f seconds" % (end - start))
 
     # %%
     plt.figure()
