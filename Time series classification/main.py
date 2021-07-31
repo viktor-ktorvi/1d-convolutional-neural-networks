@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     data_std = np.std(signal_data)
     # %% Setting up the data
-    device = torch.device("cpu")  # CPU because I have a weak GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
 
     dataset = TensorDataset(torch.tensor(signal_data), torch.tensor(signal_labels).type(torch.LongTensor))
@@ -86,12 +86,12 @@ if __name__ == "__main__":
             train_signals, train_labels = data[0].to(device, dtype=torch.float), data[1].to(device, dtype=torch.float)
 
             # reformating the label array to the form that the loss expects
-            train_labels = train_labels.view(train_labels.shape[0])
-            train_labels = train_labels.type(torch.LongTensor)
+            train_labels = train_labels.view(train_labels.shape[0]).to(device)
+            train_labels = train_labels.type(torch.LongTensor).to(device)
 
             optimizer.zero_grad()
 
-            outputs = model(train_signals.unsqueeze(1) / data_std)
+            outputs = model(train_signals.unsqueeze(1) / data_std).to(device)
             loss = criterion(outputs, train_labels)
             loss.backward()
             optimizer.step()
