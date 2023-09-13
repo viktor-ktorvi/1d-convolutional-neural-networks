@@ -8,9 +8,9 @@ import torch
 import numpy as np
 from omegaconf import DictConfig
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from torch import nn, Tensor
-from torch.nn.functional import one_hot
 from torch.utils.data import TensorDataset, DataLoader
 from torchmetrics import Accuracy
 from torchvision.transforms import Normalize
@@ -23,11 +23,12 @@ from model import TimeseriesClassifier
 from utils.signals import generate_noisy_signal
 
 
-def generate_classification_data(signals_functions: List[Callable], cfg: DictConfig) -> Tuple[List[Tensor], List[Tensor], List[str]]:
+def generate_classification_data(signals_functions: List[Callable], class_probabilities: List[float], cfg: DictConfig) -> Tuple[List[Tensor], List[Tensor], List[str]]:
     """
     Generate data for signal classification.
 
     :param signals_functions: List of signal function to generate.
+    :param class_probabilities: List that defines the probability of generating the corresponding class.
     :param cfg: Config.
     :return: Noisy signals, corresponding labels, class names.
     """
@@ -47,7 +48,7 @@ def generate_classification_data(signals_functions: List[Callable], cfg: DictCon
             frequency_high=cfg.data.frequency_high,
             phase_low=cfg.data.phase_low,
             phase_high=cfg.data.phase_high,
-            class_probabilities=None
+            class_probabilities=class_probabilities
         )
 
         noisy_signals.append(torch.tensor(noisy_signal, dtype=torch.float32).unsqueeze(0).unsqueeze(0))
@@ -65,7 +66,8 @@ def main(cfg):
 
     # generate data
     signals_functions = [np.sin, scipy.signal.square, scipy.signal.sawtooth, scipy.special.sinc]
-    noisy_signals, labels, class_names = generate_classification_data(signals_functions, cfg)
+    class_probabilities = [0.1, 0.3, 0.2, 0.4]
+    noisy_signals, labels, class_names = generate_classification_data(signals_functions, class_probabilities, cfg)
 
     # split
     signals_train, signals_val, labels_train, labels_val = train_test_split(noisy_signals, labels, test_size=0.33, random_state=42, shuffle=True)
@@ -143,20 +145,40 @@ def main(cfg):
         accuracy_train.reset()
         accuracy_val.reset()
 
-    # todo confusion matrix, clean up evaluation; evaluate on the entire validation set; show conf matrix on everything; plot a subset of that
+    # evaluate
+    evaluation_data = []
+    evaluation_labels = []
+    predictions = []
 
-    # evaluation; predict on a few samples and plot the results
-    width, height = 5, 5
-    evaluation_data = signals_val[:width * height]
-    evaluation_labels = labels_val[: width * height]
+    model.eval()
+    with torch.no_grad():
+        for batch in loader_val:
+            x, y = batch
+            x = x.to(device)
+            y = y.to(device)
+
+            out = model(x)
+
+            evaluation_data.append(x.cpu())
+            evaluation_labels.append(y.cpu())
+            predictions.append(torch.argmax(out.cpu(), dim=1))
+
+    # collect all the validation predictions
+    evaluation_data = torch.vstack(evaluation_data)
+    evaluation_labels = torch.hstack(evaluation_labels)
+    predictions = torch.hstack(predictions)
+
+    # plot the results
+    cm_display = ConfusionMatrixDisplay(
+        confusion_matrix=confusion_matrix(evaluation_labels.numpy(), predictions.numpy()),
+        display_labels=class_names
+    )
+    cm_display.plot(cmap='Greens')
+
+    width, height = 5, 4
 
     model.eval()
     model.to("cpu")
-
-    predictions = []
-    for i in range(len(evaluation_data)):
-        out = model(evaluation_data[i])
-        predictions.append(torch.argmax(out))
 
     plot_data(
         data=evaluation_data,
@@ -168,13 +190,12 @@ def main(cfg):
     )
 
     plt.show()
-    kjkszpj = None
 
 
-def plot_data(data: List[Tensor],
-              true_labels: List[Tensor],
+def plot_data(data: Tensor,
+              true_labels: Tensor,
               class_names: List[str],
-              predictions: List[Tensor] = None,
+              predictions: Tensor = None,
               width: int = 2,
               height: int = 2,
               suptitle: str = ""):
@@ -210,11 +231,19 @@ def plot_data(data: List[Tensor],
             else:
                 color = "red"
 
-        axs[i // width, i % width].plot(plotting_data, color=color, label=predicted_class_label)
-        axs[i // width, i % width].set_title(true_class_label)
+        ax = axs[i // width, i % width]
+
+        ax.xaxis.set_tick_params(labelbottom=False)
+        ax.yaxis.set_tick_params(labelleft=False)
+
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        ax.plot(plotting_data, color=color, label=predicted_class_label)
+        ax.set_title(true_class_label)
 
         if predictions is not None:
-            axs[i // (height + 1), i % width].legend(loc="upper right")
+            ax.legend(loc="upper right")
 
 
 if __name__ == "__main__":

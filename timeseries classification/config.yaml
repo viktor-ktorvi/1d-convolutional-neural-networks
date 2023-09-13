@@ -24,7 +24,7 @@ model:
   batch_size: 128
   learning_rate: 1.0e-4
 
-  num_epochs: 200
+  num_epochs: 150
 
   kernel_sizes:
     - 5

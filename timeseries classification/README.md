@@ -1,14 +1,16 @@
 # Time series classification
 
-A simple model to classify a noisy time series into one of three classes: sin, square or sawtooth wave.
+Training a 1D CNN to classify generated signals. See the details in the _config.yaml_.
 
-The model consist of two convolutional layers and three fully connected layers and achives an accurracy of around 99% training on a Core i5 CPU for about 15 seconds as it is a relatively simple problem.
+![](images/train%20data.png)
 
-<p align="center">
-  <img width="640" height="480" src="https://user-images.githubusercontent.com/69254199/124983535-5c85e000-e038-11eb-86e8-cd9254372ac2.png">
-</p>
+The model can achieve close to 99% accuracy. Here are some positive and negative examples:
 
-Although the accurracy is high, it's not perfect and it isn't really obvious why it makes the mistakes as can be seen bellow.
+![](images/evaluation.png)
 
-![predictions](https://user-images.githubusercontent.com/69254199/124983204-f4cf9500-e037-11eb-98fb-b5792fc8cae9.png)
+The dataset was imbalanced and contained the most sinc functions, then sawtooths and square
+waves, and finally, the sines were the most underrepresented, and you can tell from the
+confusion matrix that it had a big effect on the results. The sincs don't get misclassified
+even once, while the sines get mislabeled relatively often.
 
+![](images/confusion%20matrix.png)
