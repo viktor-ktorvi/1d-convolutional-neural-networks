@@ -29,11 +29,11 @@ if __name__ == "__main__":
         phase = np.random.rand() * 2 * np.pi
 
         # %% Generating the signal
-        x = getSignal(wave=waves[i],
-                      amp=amp,
-                      freq=freq,
+        x = getSignal(wave_func=waves[i],
+                      amplitude=amp,
+                      frequency=freq,
                       phase=phase,
-                      t=t)
+                      time=t)
         xnoise = x + noise_std_percent * amp * np.random.randn(signal_len)
 
         # %% Anticausal FIR filter

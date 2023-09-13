@@ -1,0 +1,47 @@
+random_seed: 123
+
+data:
+  num_samples: 3000
+
+  validation_split: 0.33
+
+  signal_length: 256
+  signal_duration: 1
+
+  amplitude_low: 10
+  amplitude_high: 100
+
+  frequency_low: 2
+  frequency_high: 20
+
+  phase_low: 0
+  phase_high: 6.28
+
+  relative_noise_std: 0.0
+
+model:
+  device: cuda
+  batch_size: 128
+  learning_rate: 1.0e-4
+
+  num_epochs: 200
+
+  kernel_sizes:
+    - 5
+    - 5
+    - 3
+    - 1
+  strides:
+    - 4
+    - 4
+    - 4
+    - 2
+  hidden_channels:
+    - 4
+    - 16
+    - 32
+    - 32
+
+  dilations: null
+
+  paddings: null

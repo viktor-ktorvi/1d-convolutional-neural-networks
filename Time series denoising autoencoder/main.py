@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from network_model import Network
-from utils.signals import generateSignalData
+from utils.signals import generate_signal_data
 import time
 
 if __name__ == "__main__":
@@ -39,16 +39,16 @@ if __name__ == "__main__":
     test_num = num_signals - train_num
 
     # %% Generate data
-    signal_labels, _, signal_data = generateSignalData(num_signals=num_signals,
-                                                       signal_len=signal_len,
-                                                       classes=classes,
-                                                       waves=waves,
-                                                       amp_max=amp_max,
-                                                       amp_min=amp_min,
-                                                       freq_max=freq_max,
-                                                       freq_min=freq_min,
-                                                       t=t,
-                                                       noise_std_percent=noise_std_percent)
+    signal_labels, _, signal_data = generate_signal_data(num_signals=num_signals,
+                                                         signal_len=signal_len,
+                                                         classes=classes,
+                                                         waves=waves,
+                                                         amp_max=amp_max,
+                                                         amp_min=amp_min,
+                                                         freq_max=freq_max,
+                                                         freq_min=freq_min,
+                                                         t=t,
+                                                         noise_std_percent=noise_std_percent)
 
     data_std = np.std(signal_data)
 
@@ -126,16 +126,16 @@ if __name__ == "__main__":
         fig, ax = plt.subplots(3, 1)
 
         for i in range(3):
-            signal_labels, _, signal_data = generateSignalData(num_signals=1,
-                                                               signal_len=signal_len,
-                                                               classes=[classes[i]],
-                                                               waves=[waves[i]],
-                                                               amp_max=amp_max,
-                                                               amp_min=amp_min,
-                                                               freq_max=freq_max,
-                                                               freq_min=freq_min,
-                                                               t=t,
-                                                               noise_std_percent=noise_std_percent)
+            signal_labels, _, signal_data = generate_signal_data(num_signals=1,
+                                                                 signal_len=signal_len,
+                                                                 classes=[classes[i]],
+                                                                 waves=[waves[i]],
+                                                                 amp_max=amp_max,
+                                                                 amp_min=amp_min,
+                                                                 freq_max=freq_max,
+                                                                 freq_min=freq_min,
+                                                                 t=t,
+                                                                 noise_std_percent=noise_std_percent)
 
             dataset = TensorDataset(torch.tensor(signal_data), torch.tensor(signal_labels))
             dataloader = DataLoader(dataset, batch_size=1)

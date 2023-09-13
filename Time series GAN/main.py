@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from torch import nn
 from network_model import Generator, Discriminator
-from utils.signals import generateSignalData
+from utils.signals import generate_signal_data
 import time
 
 import scipy.signal as signal
@@ -37,16 +37,16 @@ if __name__ == "__main__":
     discriminate_every_n_batches = 10
 
     # %% Generate data
-    ground_truth, signal_labels, signal_data = generateSignalData(num_signals=num_signals,
-                                                                  signal_len=signal_len,
-                                                                  classes=classes,
-                                                                  waves=waves,
-                                                                  amp_max=amp_max,
-                                                                  amp_min=amp_min,
-                                                                  freq_max=freq_max,
-                                                                  freq_min=freq_min,
-                                                                  t=t,
-                                                                  noise_std_percent=noise_std_percent)
+    ground_truth, signal_labels, signal_data = generate_signal_data(num_signals=num_signals,
+                                                                    signal_len=signal_len,
+                                                                    classes=classes,
+                                                                    waves=waves,
+                                                                    amp_max=amp_max,
+                                                                    amp_min=amp_min,
+                                                                    freq_max=freq_max,
+                                                                    freq_min=freq_min,
+                                                                    t=t,
+                                                                    noise_std_percent=noise_std_percent)
 
     data_std = np.std(ground_truth)
 
