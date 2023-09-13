@@ -85,8 +85,10 @@ def time_axis(signal_length: int = 256,
     :return:
     """
     sampling_frequency = signal_length / signal_duration
+    stop = signal_length / sampling_frequency / 2
+    time = np.linspace(start=-stop, stop=stop, num=signal_length)
 
-    return np.linspace(start=0, stop=(signal_length - 1) / sampling_frequency, num=signal_length)
+    return time
 
 
 def generate_noisy_signal(signal_functions: List[Callable],
@@ -134,22 +136,22 @@ def generate_noisy_signal(signal_functions: List[Callable],
 
 def main():
     # args
-    signal_length = 256
+    signal_length = 2000
     signal_duration = 1
 
     amplitude_low = 10
     amplitude_high = 1000
 
-    frequency_low = 5
-    frequency_high = 20
+    frequency_low = 2
+    frequency_high = 2
 
     phase_low = 0
     phase_high = 2 * np.pi
 
     relative_noise_std = 0.1
 
-    signals_functions = (np.sin, scipy.signal.square, scipy.signal.sawtooth)
-    class_probabilities = None
+    signals_functions = [np.sin, scipy.signal.square, scipy.signal.sawtooth, scipy.special.sinc]
+    class_probabilities = [0, 0, 0, 1]
 
     time = time_axis(signal_length, signal_duration)
 

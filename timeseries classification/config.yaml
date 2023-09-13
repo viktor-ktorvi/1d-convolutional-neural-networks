@@ -17,7 +17,7 @@ data:
   phase_low: 0
   phase_high: 6.28
 
-  relative_noise_std: 0.0
+  relative_noise_std: 0.01
 
 model:
   device: cuda
