@@ -1,0 +1,20 @@
+random_seed: 123
+
+data:
+  num_samples: 3000
+
+  validation_split: 0.33
+
+  signal_length: 256
+  signal_duration: 1
+
+  amplitude_low: 10
+  amplitude_high: 100
+
+  frequency_low: 2
+  frequency_high: 10
+
+  phase_low: 0
+  phase_high: 6.28
+
+  relative_noise_std: 0.01

@@ -1,51 +1,60 @@
+import hydra
+import scipy
+
 import numpy as np
-import scipy.signal as signal
-from utils.signals import getSignal
+
+from utils.signals import generate_noisy_signal
 from matplotlib import pyplot as plt
 
-if __name__ == "__main__":
-    # %% Signal parameters
 
-    classes = ["sin", "square", "saw"]
-
-    waves = [np.sin, signal.square, signal.sawtooth]
-
-    Fs = 2000
-    signal_len = 200
-    t = np.linspace(0, (signal_len - 1) / Fs, signal_len)
-    amp_max = 10
-    amp_min = 0
-    freq_max = 50
-    freq_min = 10
-
-    noise_std_percent = 0.1
+@hydra.main(version_base=None, config_path=".", config_name="config")
+def main(cfg):
+    signals_functions = [np.sin, scipy.signal.square, scipy.signal.sawtooth, scipy.special.sinc]
+    classes = [func.__name__ for func in signals_functions]
 
     filter_len = 3  # odd number
 
-    fig, ax = plt.subplots(3, 1)
-    for i in range(3):
-        amp = np.random.rand() * (amp_max - amp_min) + amp_min
-        freq = np.random.rand() * (freq_max - freq_min) + freq_min
-        phase = np.random.rand() * 2 * np.pi
+    width, height = 2, 2
 
-        # %% Generating the signal
-        x = getSignal(wave_func=waves[i],
-                      amplitude=amp,
-                      frequency=freq,
-                      phase=phase,
-                      time=t)
-        xnoise = x + noise_std_percent * amp * np.random.randn(signal_len)
+    assert width * height == len(signals_functions)
 
-        # %% Anticausal FIR filter
+    fig, axs = plt.subplots(height, width)
+    for i in range(len(signals_functions)):
+        noisy_signal, clean_signal, signal_func, amplitude, frequency, phase = generate_noisy_signal(
+            [signals_functions[i]],
+            cfg.data.signal_length,
+            cfg.data.signal_duration,
+            cfg.data.relative_noise_std,
+            cfg.data.amplitude_low,
+            cfg.data.amplitude_high,
+            cfg.data.frequency_low,
+            cfg.data.frequency_high,
+            cfg.data.phase_low,
+            cfg.data.phase_high
+        )
+
         b = np.ones(filter_len)
         a = filter_len
-        xfiltered = signal.filtfilt(b, a, xnoise)
-        ax[i].plot(xnoise, label='noisy signal')
-        ax[i].plot(xfiltered, color='r', label='filtered signal')
-        ax[i].set_title(classes[i], fontsize=16)
-        ax[i].set_xlabel('n [sample]', fontsize=12)
-        ax[i].set_ylabel('x(n) [unit]', fontsize=12)
-        ax[i].legend()
-    fig.suptitle("Filtered signals", horizontalalignment='center', fontsize=20)
+        xfiltered = scipy.signal.filtfilt(b, a, noisy_signal)
+
+        ax = axs[i // width, i % width]
+
+        ax.set_xlabel("n [sample]")
+        ax.set_ylabel("y")
+
+        ax.plot(noisy_signal, label='noisy signal')
+        ax.plot(xfiltered, color='r', label='filtered signal')
+        ax.set_title(classes[i])
+
+        ax.legend(loc="upper right")
+    fig.suptitle(
+        r"Anticausal averaging filter $\frac{1}{2n + 1}\sum_{i=-n}^{n}z^i$" + f" , n = {filter_len // 2}",
+        horizontalalignment='center',
+        fontsize=20
+    )
     plt.tight_layout()
     plt.show()
+
+
+if __name__ == "__main__":
+    main()
