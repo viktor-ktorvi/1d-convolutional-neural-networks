@@ -46,9 +46,9 @@ class TimeseriesClassifier(nn.Module):
                                                  padding=padding,
                                                  dilation=dilation))
 
-            self.conv = nn.ModuleList(convolutions)
+        self.conv = nn.ModuleList(convolutions)
 
-            self.linear = nn.Linear(in_features=convolutions[-1].output_length * hidden_channels[-1], out_features=num_classes)
+        self.linear = nn.Linear(in_features=convolutions[-1].output_length * hidden_channels[-1], out_features=num_classes)
 
     def forward(self, x: Tensor) -> Tensor:
         out = x
