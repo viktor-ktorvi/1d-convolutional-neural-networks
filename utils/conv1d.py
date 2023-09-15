@@ -17,6 +17,14 @@ class Conv1dWithLength(nn.Conv1d):
         self.output_length = math.floor((self.input_length + 2 * self.padding[0] - self.dilation[0] * (self.kernel_size[0] - 1) - 1) / self.stride[0] + 1)
 
 
+class ConvTranspose1dWithLength(nn.ConvTranspose1d):
+    def __init__(self, input_length: int, *args, **kwargs):
+        super(ConvTranspose1dWithLength, self).__init__(*args, **kwargs)
+
+        self.input_length = input_length
+        self.output_length = (input_length - 1) * self.stride[0] - 2 * self.padding[0] + self.dilation[0] * (self.kernel_size[0] - 1) + self.output_padding[0] + 1
+
+
 def configure_parameters(i: int, kernel_sizes: List[int], strides: List[int], dilations: List[int], paddings: List[int]) -> Tuple[int, ...]:
     """
     Extract the parameters of the i-th layer from their lists.
