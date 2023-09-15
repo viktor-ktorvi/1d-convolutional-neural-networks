@@ -5,7 +5,7 @@ import math
 from torch import nn, Tensor
 from torch.nn import functional as F
 
-from utils.conv1d import Conv1dWithLength
+from utils.conv1d import Conv1dWithLength, configure_parameters
 
 
 class TimeseriesClassifier(nn.Module):
@@ -36,24 +36,7 @@ class TimeseriesClassifier(nn.Module):
                 in_channels = hidden_channels[i - 1]
 
             out_channels = hidden_channels[i]
-            kernel_size = kernel_sizes[i]
-
-            if strides is None:
-                stride = 1
-            else:
-                stride = strides[i]
-
-            if dilations is None:
-                dilation = 1
-            else:
-                dilation = dilations[i]
-
-            if paddings is None:
-                padding = math.ceil((dilation * (kernel_size - 1) + 1 - stride) / 2)  # roughly keep the kernel from eating into the signal
-                if padding < 0:
-                    padding = 0
-            else:
-                padding = paddings[i]
+            kernel_size, stride, dilation, padding = configure_parameters(i, kernel_sizes, strides, dilations, paddings)
 
             convolutions.append(Conv1dWithLength(input_length=in_length,
                                                  in_channels=in_channels,
