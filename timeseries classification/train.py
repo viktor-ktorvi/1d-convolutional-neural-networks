@@ -70,7 +70,7 @@ def main(cfg):
     noisy_signals, labels, class_names = generate_classification_data(signals_functions, class_probabilities, cfg)
 
     # split
-    signals_train, signals_val, labels_train, labels_val = train_test_split(noisy_signals, labels, test_size=0.33, random_state=42, shuffle=True)
+    signals_train, signals_val, labels_train, labels_val = train_test_split(noisy_signals, labels, test_size=cfg.data.validation_split, shuffle=True)
 
     plot_data(
         data=signals_train,
