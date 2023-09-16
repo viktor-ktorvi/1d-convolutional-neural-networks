@@ -17,7 +17,7 @@ data:
   phase_low: 0
   phase_high: 6.28
 
-  relative_noise_std: 0.01
+  relative_noise_std: 0.1
 
 model:
   device: cuda
@@ -45,3 +45,7 @@ model:
   dilations: null
 
   paddings: null
+
+wandb:
+  project: 1d-cnns
+  mode: disabled

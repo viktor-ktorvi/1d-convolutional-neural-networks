@@ -1,3 +1,4 @@
+from pprint import pprint
 from typing import List, Tuple, Callable
 
 import hydra
@@ -6,7 +7,8 @@ import scipy
 import torch
 
 import numpy as np
-from omegaconf import DictConfig
+import wandb
+from omegaconf import DictConfig, OmegaConf
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
@@ -59,6 +61,17 @@ def generate_classification_data(signals_functions: List[Callable], class_probab
 
 @hydra.main(version_base=None, config_path=".", config_name="config")
 def main(cfg):
+    plt.rcParams["figure.figsize"] = (14, 8)  # set figure size
+
+    # initialize experiment tracking with wandb
+    wandb.init(project=cfg.wandb.project, mode=cfg.wandb.mode)
+
+    # cross-update hydra and wandb configs
+    cfg = OmegaConf.merge(cfg, dict(wandb.config))
+    wandb.config.update({"config": OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)}, allow_val_change=True)
+    print("Config: ", end="")
+    pprint(dict(wandb.config))
+
     # set random seeds
     random.seed(cfg.random_seed)
     np.random.seed(cfg.random_seed)
@@ -72,14 +85,16 @@ def main(cfg):
     # split
     signals_train, signals_val, labels_train, labels_val = train_test_split(noisy_signals, labels, test_size=cfg.data.validation_split, shuffle=True)
 
-    plot_data(
+    fig_training_data, _ = plot_data(
         data=signals_train,
         true_labels=labels_train,
         width=3, height=2,
         class_names=class_names,
         suptitle="Training data"
     )
-    plt.pause(0.001)
+
+    if cfg.wandb.mode == "disabled":
+        plt.pause(0.001)
 
     # datasets and loaders
     dataset_train = TensorDataset(torch.vstack(signals_train), torch.vstack(labels_train).squeeze())
@@ -101,6 +116,7 @@ def main(cfg):
                                  input_channels=signals_train[0].shape[1])
     model.to(device)
 
+    print("Model: ", end="")
     print(model)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.model.learning_rate)
@@ -141,7 +157,17 @@ def main(cfg):
 
                 accuracy_val(out, y)
 
-        progress_bar.set_description(f"Training | Validation: accuracy: {accuracy_train.compute(): 5.3f} | {accuracy_val.compute(): 5.3f}")
+        epoch_accuracy_train = accuracy_train.compute()
+        epoch_accuracy_val = accuracy_val.compute()
+
+        # log
+        wandb.log({
+            "train/accuracy": epoch_accuracy_train,
+            "val/accuracy": epoch_accuracy_val
+        })
+
+        progress_bar.set_description(f"Training | Validation: accuracy: {epoch_accuracy_train: 5.3f} | {epoch_accuracy_val: 5.3f}")
+
         accuracy_train.reset()
         accuracy_val.reset()
 
@@ -173,14 +199,14 @@ def main(cfg):
         confusion_matrix=confusion_matrix(evaluation_labels.numpy(), predictions.numpy()),
         display_labels=class_names
     )
-    cm_display.plot(cmap='Greens')
+    plt_confusion_matrix = cm_display.plot(cmap='Greens')
 
     width, height = 5, 4
 
     model.eval()
     model.to("cpu")
 
-    plot_data(
+    fig_evaluation_results, ax = plot_data(
         data=evaluation_data,
         true_labels=evaluation_labels,
         predictions=predictions,
@@ -189,7 +215,14 @@ def main(cfg):
         suptitle="Evaluation"
     )
 
-    plt.show()
+    images = [wandb.Image(fig_training_data, caption="training data"),
+              wandb.Image(fig_evaluation_results, caption="evaluation results"),
+              wandb.Image(plt_confusion_matrix.figure_, caption="confusion matrix")]
+
+    wandb.log({"images": images})
+
+    if cfg.wandb.mode == "disabled":
+        plt.show()
 
 
 def plot_data(data: Tensor,
@@ -244,6 +277,8 @@ def plot_data(data: Tensor,
 
         if predictions is not None:
             ax.legend(loc="upper right")
+
+    return fig, axs
 
 
 if __name__ == "__main__":
