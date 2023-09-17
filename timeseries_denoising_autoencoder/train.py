@@ -2,24 +2,19 @@ import random
 from typing import List, Callable, Tuple
 
 import hydra
+import numpy as np
 import scipy
 import torch
-
-import numpy as np
 import torch.nn as nn
-
+from matplotlib import pyplot as plt
 from omegaconf import DictConfig
 from sklearn.model_selection import train_test_split
 from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset
 from torchmetrics import R2Score
-from torchvision.transforms import Normalize
 from tqdm import tqdm
 
-from matplotlib import pyplot as plt
-
 from model import TimeseriesAutoencoder
-
 from utils.signals import generate_noisy_signal
 
 
@@ -97,7 +92,9 @@ def main(cfg):
                                   input_channels=noisy_train[0].shape[1])
     model.to(device)
 
-    print(model)
+    print("Model: ", model)
+
+    print("Layer lengths: ")
 
     for conv in model.conv:
         print(f"{conv.input_length}->{conv.output_length}")
@@ -142,7 +139,7 @@ def main(cfg):
 
                 r2_val(out, y)
 
-        progress_bar.set_description(f"Training | Validation: r2 score: {r2_train.compute(): 5.3f} | {r2_val.compute(): 5.3f}")
+        progress_bar.set_description(f"Training | Validation: r2 score: {r2_train.compute(): 5.5f} | {r2_val.compute(): 5.5f}")
         r2_train.reset()
         r2_val.reset()
 

@@ -1,25 +1,20 @@
+import random
 from typing import List, Tuple, Callable
 
 import hydra
-import random
+import numpy as np
 import scipy
 import torch
-
-import numpy as np
+from matplotlib import pyplot as plt
 from omegaconf import DictConfig
-
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from torch import nn, Tensor
 from torch.utils.data import TensorDataset, DataLoader
 from torchmetrics import Accuracy
-from torchvision.transforms import Normalize
 from tqdm import tqdm
 
-from matplotlib import pyplot as plt
-
 from model import TimeseriesClassifier
-
 from utils.signals import generate_noisy_signal
 
 

@@ -1,10 +1,9 @@
 import hydra
-import scipy
-
 import numpy as np
+import scipy
+from matplotlib import pyplot as plt
 
 from utils.signals import generate_noisy_signal
-from matplotlib import pyplot as plt
 
 
 @hydra.main(version_base=None, config_path=".", config_name="config")

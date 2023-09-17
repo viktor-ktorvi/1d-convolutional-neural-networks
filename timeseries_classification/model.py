@@ -1,7 +1,5 @@
 from typing import List
 
-import math
-
 from torch import nn, Tensor
 from torch.nn import functional as F
 
