@@ -18,6 +18,10 @@ class Conv1dWithLength(nn.Conv1d):
 
 
 class ConvTranspose1dWithLength(nn.ConvTranspose1d):
+    """
+    ConvTranspose1d that keeps track of the input and output length
+    """
+
     def __init__(self, input_length: int, *args, **kwargs):
         super(ConvTranspose1dWithLength, self).__init__(*args, **kwargs)
 
